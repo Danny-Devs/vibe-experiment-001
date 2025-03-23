@@ -269,3 +269,125 @@ h3 {
     padding: 0.6rem;
   }
 }
+
+/* Win Modal Styles */
+.win-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.win-modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  transform: translateY(20px);
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+.win-modal h2 {
+  color: #2d3436;
+  font-size: 1.8rem;
+  margin: 0 0 1rem;
+}
+
+.win-modal p {
+  color: #636e72;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.win-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #f5f6fa;
+  border-radius: 8px;
+}
+
+.win-stats div {
+  color: #2d3436;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.next-level-btn {
+  background: #0984e3;
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.next-level-btn:hover {
+  background: #0878d3;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(9, 132, 227, 0.3);
+}
+
+/* Confetti Styles */
+.confetti {
+  position: fixed;
+  z-index: 999;
+  pointer-events: none;
+  animation: confettiFall linear forwards;
+  border-radius: 2px;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(25vh) rotate(180deg) translateX(15px);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(50vh) rotate(360deg) translateX(-15px);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(75vh) rotate(540deg) translateX(15px);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

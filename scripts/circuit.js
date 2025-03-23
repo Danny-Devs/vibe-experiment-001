@@ -47,6 +47,9 @@ export class Circuit {
     this.hoveredComponent = null;
     this.mouseX = 0;
     this.mouseY = 0;
+    this.solution = null;
+    this.isComplete = false;
+    this.confettiParticles = [];
     this.setupEventListeners();
   }
 
@@ -152,6 +155,7 @@ export class Circuit {
       to.inputs.push(from);
       from.connections.push(to);
       this.evaluate();
+      this.checkWinCondition(); // Check for win after each connection
     }
   }
 
@@ -333,5 +337,149 @@ export class Circuit {
         this.ctx.fillText(label, tooltipX, tooltipY);
       }
     });
+  }
+
+  setSolution(solution) {
+    // Solution format: Array of {from: componentIndex, to: componentIndex}
+    this.solution = solution;
+  }
+
+  checkWinCondition() {
+    if (!this.solution || this.isComplete) return false;
+
+    // Check if all required connections exist
+    const allConnectionsCorrect = this.solution.every(connection => {
+      const fromComponent = this.components[connection.from];
+      const toComponent = this.components[connection.to];
+      return this.areConnected(fromComponent, toComponent);
+    });
+
+    // Check if all outputs are correct
+    const outputsCorrect = this.components
+      .filter(c => c.type === 'OUTPUT')
+      .every(c => c.output === true);
+
+    if (allConnectionsCorrect && outputsCorrect && !this.isComplete) {
+      this.isComplete = true;
+      this.celebrateWin();
+      return true;
+    }
+
+    return false;
+  }
+
+  celebrateWin() {
+    // Create and show modal immediately
+    const modal = document.createElement('div');
+    modal.className = 'win-modal';
+    modal.style.opacity = '1'; // Force opacity
+    modal.innerHTML = `
+      <div class="win-modal-content">
+        <h2>Circuit Complete! 🎉</h2>
+        <p>Excellent work! You've successfully solved this circuit puzzle.</p>
+        <div class="win-stats">
+          <div>Score: +100</div>
+          <div>Perfect Solution! ⭐</div>
+        </div>
+        <button class="next-level-btn">Next Circuit →</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Add click handler for next level button
+    const nextButton = modal.querySelector('.next-level-btn');
+    nextButton.addEventListener('click', () => {
+      modal.remove();
+      if (typeof this.onNextLevel === 'function') {
+        this.onNextLevel();
+      }
+    });
+
+    // Create confetti with more particles and better spread
+    const createConfettiParticle = () => {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+
+      // Randomize starting position across entire window width
+      confetti.style.left = Math.random() * window.innerWidth + 'px';
+
+      // Randomize size between 8px and 12px
+      const size = Math.random() * 4 + 8;
+      confetti.style.width = size + 'px';
+      confetti.style.height = size + 'px';
+
+      // Randomize color
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+      // Randomize animation duration between 2s and 5s
+      confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+
+      // Add rotation
+      confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+      // Start from above the viewport
+      confetti.style.top = '-20px';
+
+      document.body.appendChild(confetti);
+
+      // Remove after animation
+      setTimeout(() => confetti.remove(), 5000);
+    };
+
+    // Create more confetti particles with staggered timing
+    for (let i = 0; i < 150; i++) {
+      setTimeout(createConfettiParticle, i * 20);
+    }
+
+    // Animate circuit components with rainbow effect
+    let frame = 0;
+    const celebrationAnimation = () => {
+      if (frame > 180) return; // 3 second animation
+
+      this.components.forEach((component, index) => {
+        // Calculate pulsing effect
+        const scale = 1 + Math.sin(frame * 0.1) * 0.15;
+        const bounce = Math.sin(frame * 0.2 + index) * 5;
+
+        // Save context state
+        this.ctx.save();
+
+        // Apply transformations
+        this.ctx.translate(component.x, component.y + bounce);
+        this.ctx.scale(scale, scale);
+        this.ctx.translate(-component.x, -(component.y + bounce));
+
+        // Rainbow color effect for components
+        const hue = (frame * 3 + index * 30) % 360;
+        this.ctx.strokeStyle = `hsl(${hue}, 70%, 60%)`;
+        this.ctx.fillStyle = `hsl(${hue}, 70%, 95%)`;
+        this.ctx.lineWidth = 2 + Math.sin(frame * 0.1);
+
+        // Draw component with celebration effect
+        this.drawComponent(component);
+
+        // Restore context
+        this.ctx.restore();
+      });
+
+      // Animate connections with rainbow effect
+      this.components.forEach(component => {
+        component.connections.forEach((target, index) => {
+          const hue = (frame * 3 + index * 30) % 360;
+          this.ctx.strokeStyle = `hsl(${hue}, 70%, 60%)`;
+          this.ctx.lineWidth = 2 + Math.sin(frame * 0.1);
+          this.ctx.beginPath();
+          this.ctx.moveTo(component.x, component.y);
+          this.ctx.lineTo(target.x, target.y);
+          this.ctx.stroke();
+        });
+      });
+
+      frame++;
+      requestAnimationFrame(celebrationAnimation);
+    };
+
+    celebrationAnimation();
   }
 } 

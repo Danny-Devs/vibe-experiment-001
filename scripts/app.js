@@ -85,6 +85,36 @@ class App {
     this.currentChallenge = 0;
     this.challenges = this.setupChallenges();
 
+    // Set up next level callback
+    this.circuit.onNextLevel = () => {
+      this.currentChallenge++;
+      if (this.currentChallenge < this.challenges.length) {
+        this.loadChallenge(this.currentChallenge);
+      } else {
+        // Game complete state
+        const modal = document.createElement('div');
+        modal.className = 'win-modal';
+        modal.innerHTML = `
+          <div class="win-modal-content">
+            <h2>Game Complete! 🏆</h2>
+            <p>Congratulations! You've mastered all the circuit challenges!</p>
+            <div class="win-stats">
+              <div>Total Score: 300</div>
+              <div>All Challenges Complete! 🌟</div>
+            </div>
+            <button class="next-level-btn">Play Again</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        modal.querySelector('.next-level-btn').addEventListener('click', () => {
+          modal.remove();
+          this.currentChallenge = 0;
+          this.loadChallenge(0);
+        });
+      }
+    };
+
     this.setupUI();
     this.loadChallenge(0);
   }
@@ -133,8 +163,12 @@ class App {
     // Setup control buttons
     document.getElementById('runCircuit').addEventListener('click', () => {
       this.circuit.evaluate();
-      if (this.challenges[this.currentChallenge].verify(this.circuit)) {
-        this.completeChallenge();
+      const currentChallenge = this.challenges[this.currentChallenge];
+      if (currentChallenge.verify(this.circuit)) {
+        const solution = currentChallenge.getSolution();
+        // Force celebration immediately instead of waiting for connection check
+        this.circuit.isComplete = true;
+        this.circuit.celebrateWin();
       }
     });
 
@@ -172,6 +206,9 @@ class App {
       this.circuit.connect(components[conn.from], components[conn.to]);
     });
 
+    // Set solution for win state detection
+    this.circuit.setSolution(solution.connections);
+
     // Evaluate the circuit
     this.circuit.evaluate();
   }
@@ -197,8 +234,10 @@ class App {
     document.querySelector('.progress-text').textContent =
       `Challenge Progress: ${index}/${this.challenges.length}`;
 
-    // Reset circuit
+    // Reset circuit and solution
     this.circuit.components = [];
+    this.circuit.solution = null;
+    this.circuit.isComplete = false;
 
     // Add initial components
     const inputY = this.circuit.canvas.height / 2;
@@ -209,18 +248,10 @@ class App {
       this.circuit.canvas.width - 50,
       this.circuit.canvas.height / 2
     );
-  }
 
-  completeChallenge() {
-    this.currentChallenge++;
-    if (this.currentChallenge < this.challenges.length) {
-      setTimeout(() => {
-        alert('Challenge completed! Moving to next challenge...');
-        this.loadChallenge(this.currentChallenge);
-      }, 500);
-    } else {
-      alert('Congratulations! You\'ve completed all challenges!');
-    }
+    // Set solution for win state detection
+    const solution = challenge.getSolution();
+    this.circuit.setSolution(solution.connections);
   }
 }
 
