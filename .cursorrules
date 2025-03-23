@@ -1,0 +1,71 @@
+# Cursor AI Guidelines for Web Development Portfolio Projects
+
+## Project Approach
+- Prefer vanilla JavaScript, CSS, and HTML for a hackathon-style approach
+- Only use frameworks and libraries when they significantly benefit the project
+- Be framework/library agnostic when they are needed
+- Focus on front-end development with highly interactive and engaging UIs
+- Implement both dark and light mode for all projects
+- Write clean, efficient, and maintainable code
+
+## Code Quality Standards
+- Keep files under 300 lines - suggest refactoring or modularization when exceeding this
+- Maintain functions under 30 lines for better readability
+- Use meaningful comments that explain "why" not just "what"
+- Implement ES modules for JavaScript organization
+- Create component-specific CSS files with shared variables
+- Use templating through JavaScript when HTML needs a modular approach
+- Avoid duplicate code blocks and overly complex nested conditionals
+- Limit functions to 3 parameters when possible
+
+## UI Development
+- Ensure all interfaces have WCAG AA compliance at minimum
+- Take a mobile-first approach, supporting screens from 320px to 1920px
+- Create subtle, purposeful animations with reduced motion alternatives
+- Provide immediate visual/audio feedback for user actions
+- Always include loading states and clear error messages
+- Design intuitive, consistent navigation with clear information architecture
+- Implement progressive disclosure and inline validation for forms
+- Optimize for Core Web Vitals performance metrics
+
+## Project Type-Specific Guidelines
+
+### Websites
+- Focus on content presentation, information architecture, and SEO
+- Implement clear navigation, content hierarchy, and call-to-action paths
+
+### Web Apps
+- Emphasize functionality, state management, and data visualization
+- Create effective dashboard layouts, CRUD operations, and offline capabilities
+
+### Games
+- Build solid game loops, sprite/asset management, and state transitions
+- Use requestAnimationFrame, effective sprite management, and collision detection
+
+### Gamified Apps
+- Develop progression systems, feedback loops, and achievement mechanics
+- Implement point systems, level progression, and badge/achievement features
+
+## Project Structure
+- Organize files logically:
+  - /assets/ for images, fonts, icons
+  - /styles/ for component and global styles, variables, themes
+  - /scripts/ for components, utilities, services, constants
+  - /pages/ for page templates
+  - /components/ for reusable UI components
+- Use consistent naming conventions:
+  - Files: kebab-case
+  - JavaScript: camelCase for variables and functions, PascalCase for classes, UPPER_SNAKE_CASE for constants
+  - CSS: kebab-case for classes, --kebab-case for variables
+
+## AI Guidance Preferences
+- Provide code explanations before implementation
+- Suggest alternative approaches when relevant
+- Break down complex features into clear implementation steps
+- Deliver fully functional code snippets
+- Include usage examples for complex components
+- Handle common error scenarios
+- Target modern browsers with appropriate polyfills
+- Suggest optimization techniques
+- Highlight potential vulnerabilities
+- Recommend test cases and approaches

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Circuit Logic: A Puzzle Adventure</title>
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/themes.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="instructions-panel">
+          <h2>How to Play</h2>
+          <ol class="instruction-list">
+            <li>Click component buttons to add them to the board</li>
+            <li>Drag components to position them</li>
+            <li>Hold SHIFT + click between components to connect them</li>
+            <li>Connect inputs to logic gates, then to output</li>
+            <li>Click "Run Circuit" to test your solution</li>
+          </ol>
+        </div>
+
+        <div class="components-panel">
+          <h2>Components</h2>
+          <div class="component-list">
+            <!-- Components will be added here dynamically -->
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <h2>Current Challenge</h2>
+          <div class="current-challenge">
+            <h3>Challenge 1: Basic Gates</h3>
+            <p class="challenge-description">
+              Create a circuit that outputs TRUE only when both inputs are TRUE.
+            </p>
+          </div>
+          <div class="truth-table">
+            <!-- Truth table will be added here dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <div class="main-area">
+        <div class="toolbar">
+          <button id="runCircuit" class="primary-btn">Run Circuit</button>
+          <button id="resetCircuit" class="secondary-btn">Reset</button>
+          <button id="showSolution" class="secondary-btn">Show Solution</button>
+        </div>
+
+        <div class="circuit-board">
+          <canvas id="circuitCanvas"></canvas>
+        </div>
+
+        <div class="challenge-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+          </div>
+          <span class="progress-text">Challenge Progress: 0/3</span>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="scripts/app.js"></script>
+  </body>
+</html>
