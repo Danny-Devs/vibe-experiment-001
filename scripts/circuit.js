@@ -71,7 +71,12 @@ export class Circuit {
       if (e.shiftKey) {
         // If shift is held and we have a connection start component
         if (this.connectionStart && this.connectionStart !== component) {
-          this.connect(this.connectionStart, component);
+          // Check if components are already connected
+          if (this.areConnected(this.connectionStart, component)) {
+            this.disconnect(this.connectionStart, component);
+          } else {
+            this.connect(this.connectionStart, component);
+          }
           this.connectionStart.selected = false;
           this.connectionStart = null;
         }
@@ -115,12 +120,37 @@ export class Circuit {
     }
   }
 
+  areConnected(comp1, comp2) {
+    // Check both directions
+    return comp1.connections.includes(comp2) || comp2.connections.includes(comp1) ||
+      comp1.inputs.includes(comp2) || comp2.inputs.includes(comp1);
+  }
+
   connect(from, to) {
     if (to.type !== 'INPUT' && to.inputs.length < 2) {
       to.inputs.push(from);
       from.connections.push(to);
       this.evaluate();
     }
+  }
+
+  disconnect(comp1, comp2) {
+    // Check and remove connections in both directions
+    if (comp1.connections.includes(comp2)) {
+      const idx = comp1.connections.indexOf(comp2);
+      comp1.connections.splice(idx, 1);
+      const inputIdx = comp2.inputs.indexOf(comp1);
+      if (inputIdx !== -1) comp2.inputs.splice(inputIdx, 1);
+    }
+
+    if (comp2.connections.includes(comp1)) {
+      const idx = comp2.connections.indexOf(comp1);
+      comp2.connections.splice(idx, 1);
+      const inputIdx = comp1.inputs.indexOf(comp2);
+      if (inputIdx !== -1) comp1.inputs.splice(inputIdx, 1);
+    }
+
+    this.evaluate();
   }
 
   findComponentAt(x, y) {
