@@ -7,6 +7,7 @@ export class CircuitComponent {
     this.output = false;
     this.selected = false;
     this.connections = [];
+    this.hovered = false;
   }
 
   evaluate() {
@@ -43,6 +44,9 @@ export class Circuit {
     this.components = [];
     this.dragging = null;
     this.connectionStart = null; // Store the first component clicked for connection
+    this.hoveredComponent = null;
+    this.mouseX = 0;
+    this.mouseY = 0;
     this.setupEventListeners();
   }
 
@@ -98,14 +102,31 @@ export class Circuit {
   }
 
   handleMouseMove(e) {
-    if (!this.dragging) return;
-
     const rect = this.canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    this.dragging.x = x;
-    this.dragging.y = y;
+    this.mouseX = x;
+    this.mouseY = y;
+
+    // Update hover state
+    const hoveredComponent = this.findComponentAt(x, y);
+    if (this.hoveredComponent !== hoveredComponent) {
+      if (this.hoveredComponent) {
+        this.hoveredComponent.hovered = false;
+      }
+      if (hoveredComponent) {
+        hoveredComponent.hovered = true;
+      }
+      this.hoveredComponent = hoveredComponent;
+    }
+
+    // Handle dragging
+    if (this.dragging) {
+      this.dragging.x = x;
+      this.dragging.y = y;
+    }
+
     this.render();
   }
 
@@ -186,6 +207,17 @@ export class Circuit {
     this.render();
   }
 
+  getComponentLabel(type) {
+    const labels = {
+      'INPUT': 'Input Node (click to toggle)',
+      'OUTPUT': 'Output Node',
+      'AND': 'AND Gate (A·B)',
+      'OR': 'OR Gate (A+B)',
+      'NOT': 'NOT Gate (¬A)'
+    };
+    return labels[type] || type;
+  }
+
   render() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -203,20 +235,103 @@ export class Circuit {
 
     // Draw components
     this.components.forEach(component => {
-      this.ctx.fillStyle = component.output ? '#00cec9' : '#dfe6e9';
       this.ctx.strokeStyle = component.selected ? '#0984e3' : '#2d3436';
       this.ctx.lineWidth = component.selected ? 3 : 2;
+      this.ctx.fillStyle = component.output ? '#00cec9' : '#fff';
 
-      this.ctx.beginPath();
-      this.ctx.arc(component.x, component.y, 20, 0, Math.PI * 2);
-      this.ctx.fill();
-      this.ctx.stroke();
+      switch (component.type) {
+        case 'INPUT':
+          // Draw input node (small circle)
+          this.ctx.beginPath();
+          this.ctx.arc(component.x, component.y, 15, 0, Math.PI * 2);
+          this.ctx.fill();
+          this.ctx.stroke();
+          break;
 
-      this.ctx.fillStyle = '#2d3436';
-      this.ctx.font = '12px monospace';
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-      this.ctx.fillText(component.type, component.x, component.y);
+        case 'OUTPUT':
+          // Draw output node (double circle)
+          this.ctx.beginPath();
+          this.ctx.arc(component.x, component.y, 15, 0, Math.PI * 2);
+          this.ctx.fill();
+          this.ctx.stroke();
+          this.ctx.beginPath();
+          this.ctx.arc(component.x, component.y, 12, 0, Math.PI * 2);
+          this.ctx.stroke();
+          break;
+
+        case 'AND':
+          // Draw AND gate
+          this.ctx.beginPath();
+          this.ctx.moveTo(component.x - 20, component.y - 20); // Start top-left
+          this.ctx.lineTo(component.x - 20, component.y + 20); // Down
+          this.ctx.lineTo(component.x, component.y + 20);      // Right bottom
+          this.ctx.arc(component.x, component.y, 20, Math.PI / 2, -Math.PI / 2, true); // Right curve
+          this.ctx.closePath();
+          this.ctx.fill();
+          this.ctx.stroke();
+          break;
+
+        case 'OR':
+          // Draw OR gate
+          this.ctx.beginPath();
+          // Left curve
+          this.ctx.moveTo(component.x - 20, component.y - 20);
+          this.ctx.quadraticCurveTo(component.x - 35, component.y, component.x - 20, component.y + 20);
+          // Right curve
+          this.ctx.quadraticCurveTo(component.x, component.y + 15, component.x + 20, component.y);
+          this.ctx.quadraticCurveTo(component.x, component.y - 15, component.x - 20, component.y - 20);
+          this.ctx.fill();
+          this.ctx.stroke();
+          break;
+
+        case 'NOT':
+          // Draw NOT gate (triangle with circle)
+          this.ctx.beginPath();
+          this.ctx.moveTo(component.x - 20, component.y - 20); // Top
+          this.ctx.lineTo(component.x - 20, component.y + 20); // Down
+          this.ctx.lineTo(component.x + 15, component.y);      // Point
+          this.ctx.closePath();
+          this.ctx.fill();
+          this.ctx.stroke();
+
+          // Output bubble
+          this.ctx.beginPath();
+          this.ctx.arc(component.x + 20, component.y, 5, 0, Math.PI * 2);
+          this.ctx.fill();
+          this.ctx.stroke();
+          break;
+      }
+
+      // Draw hover tooltip
+      if (component.hovered) {
+        const label = this.getComponentLabel(component.type);
+        this.ctx.font = '14px system-ui';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+
+        // Draw tooltip background
+        const metrics = this.ctx.measureText(label);
+        const padding = 8;
+        const tooltipWidth = metrics.width + padding * 2;
+        const tooltipHeight = 24;
+        const tooltipX = component.x;
+        const tooltipY = component.y - 40;
+
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        this.ctx.beginPath();
+        this.ctx.roundRect(
+          tooltipX - tooltipWidth / 2,
+          tooltipY - tooltipHeight / 2,
+          tooltipWidth,
+          tooltipHeight,
+          4
+        );
+        this.ctx.fill();
+
+        // Draw tooltip text
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillText(label, tooltipX, tooltipY);
+      }
     });
   }
 } 
